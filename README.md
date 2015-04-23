@@ -1,2 +1,4 @@
-# gist
-create gists from command line
+gist
+====
+
+Create gists from command line.
