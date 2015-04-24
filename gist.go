@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -17,10 +16,7 @@ func readLine(scanner *bufio.Scanner, replace_lines intslice) {
 
 	scanner.Split(bufio.ScanLines)
 
-	sort.Ints(replace_lines)
-	rl := removeDuplicates(replace_lines)
-
-	fmt.Println(rl)
+	fmt.Println(replace_lines)
 
 	line := 0
 
@@ -66,6 +62,8 @@ func (i *intslice) Set(value string) error {
 		return errors.New("line flag already set")
 	}
 
+	out := []int{}
+
 	for _, ln := range strings.Split(value, ",") {
 		//
 		// try to sanitize input 1, 3,  7, 9
@@ -75,22 +73,25 @@ func (i *intslice) Set(value string) error {
 		if err != nil {
 			return err
 		}
-		*i = append(*i, line)
+		out = append(out, line)
+		// Insertion sort
+		fmt.Println("Start:", out)
+		for x := 1; x < len(out); x++ {
+			value := out[x]
+			y := x - 1
+			for y >= 0 && out[y] > value {
+				fmt.Printf("Value: %d\n out[y]: %d y: %d\n", value, out[y], y)
+				out[y+1] = out[y]
+				y = y - 1
+			}
+			out[y+1] = value
+		}
+		fmt.Printf("End:   %v \n", out)
 	}
+
+	fmt.Println("sorted ---------->", out)
 
 	return nil
-}
-
-func removeDuplicates(a []int) []int {
-	result := []int{}
-	seen := map[int]int{}
-	for _, val := range a {
-		if _, ok := seen[val]; !ok {
-			result = append(result, val)
-			seen[val] = val
-		}
-	}
-	return result
 }
 
 var replace_lines intslice
