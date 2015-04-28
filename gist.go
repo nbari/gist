@@ -63,33 +63,32 @@ func (i *intslice) Set(value string) error {
 	}
 
 	out := []int{}
+	set := map[int]struct{}{}
 
-	for _, ln := range strings.Split(value, ",") {
-		//
-		// try to sanitize input 1, 3,  7, 9
-		//fmt.Printf("[%s]\n", strings.TrimSpace(ln))
-		//
-		line, err := strconv.Atoi(ln)
+	for _, n := range strings.Split(value, ",") {
+		num, err := strconv.Atoi(n)
 		if err != nil {
-			return err
+			continue
 		}
-		out = append(out, line)
+		if _, ok := set[num]; ok {
+			continue
+		}
+		out = append(out, num)
+		set[num] = struct{}{}
+
 		// Insertion sort
-		fmt.Println("Start:", out)
 		for x := 1; x < len(out); x++ {
 			value := out[x]
 			y := x - 1
 			for y >= 0 && out[y] > value {
-				fmt.Printf("Value: %d\n out[y]: %d y: %d\n", value, out[y], y)
 				out[y+1] = out[y]
 				y = y - 1
 			}
 			out[y+1] = value
 		}
-		fmt.Printf("End:   %v \n", out)
 	}
 
-	fmt.Println("sorted ---------->", out)
+	fmt.Println("sorted ---------->", out, set)
 
 	return nil
 }
