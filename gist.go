@@ -16,8 +16,6 @@ func readLine(scanner *bufio.Scanner, replace_lines intslice) {
 
 	scanner.Split(bufio.ScanLines)
 
-	fmt.Println(replace_lines)
-
 	line := 0
 
 	ra, _ := regexp.Compile("[^\\s]")
@@ -62,7 +60,9 @@ func (i *intslice) Set(value string) error {
 		return errors.New("line flag already set")
 	}
 
-	out := []int{}
+	fmt.Println(*i)
+
+	//out := []int{}
 	set := map[int]struct{}{}
 
 	for _, n := range strings.Split(value, ",") {
@@ -73,29 +73,27 @@ func (i *intslice) Set(value string) error {
 		if _, ok := set[num]; ok {
 			continue
 		}
-		out = append(out, num)
+		*i = append(*i, num)
 		set[num] = struct{}{}
 
 		// Insertion sort
-		for x := 1; x < len(out); x++ {
-			value := out[x]
+		for x := 1; x < len(*i); x++ {
+			value := (*i)[x]
 			y := x - 1
-			for y >= 0 && out[y] > value {
-				out[y+1] = out[y]
+			for y >= 0 && (*i)[y] > value {
+				(*i)[y+1] = (*i)[y]
 				y = y - 1
 			}
-			out[y+1] = value
+			(*i)[y+1] = value
 		}
 	}
-
-	fmt.Println("sorted ---------->", out, set)
 
 	return nil
 }
 
-var replace_lines intslice
-
 func main() {
+
+	var replace_lines intslice
 
 	flag.Var(&replace_lines, "l", "Number of the line(s) to be replaced")
 
