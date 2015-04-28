@@ -12,21 +12,22 @@ import (
 	"strings"
 )
 
-func readLine(scanner *bufio.Scanner, replace_lines intslice) {
+func readLine(scanner *bufio.Scanner, replace_lines IntSet) {
 
 	scanner.Split(bufio.ScanLines)
 
-	line := 0
+	line := 1
 
 	ra, _ := regexp.Compile("[^\\s]")
 
 	for scanner.Scan() {
-		line += 1
-		if line == 4 {
+		_, s := replace_lines[line]
+		if s {
 			fmt.Printf("%d: %v\n", line, ra.ReplaceAllString(scanner.Text(), "-"))
 		} else {
 			fmt.Printf("%d: %v\n", line, scanner.Text())
 		}
+		line += 1
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -44,48 +45,28 @@ func Exists(name string) bool {
 	return true
 }
 
-// slice of ints
-type intslice []int
+// set of ints
+type IntSet map[int]struct{}
 
-// String is the method to format the flag's value.
-func (i *intslice) String() string {
+func (i *IntSet) String() string {
 	return fmt.Sprint(*i)
 }
 
-// Set is the method to set the flag value, part of the flag.Value interface.
-// Set's argument is a string to be parsed to set the flag.
-// It's a comma-separated list, so we split it.
-func (i *intslice) Set(value string) error {
+func (i *IntSet) Set(value string) error {
 	if len(*i) > 0 {
 		return errors.New("line flag already set")
 	}
-
-	fmt.Println(*i)
-
-	//out := []int{}
-	set := map[int]struct{}{}
 
 	for _, n := range strings.Split(value, ",") {
 		num, err := strconv.Atoi(n)
 		if err != nil {
 			continue
 		}
-		if _, ok := set[num]; ok {
+		if _, found := (*i)[num]; found {
 			continue
 		}
-		*i = append(*i, num)
-		set[num] = struct{}{}
+		(*i)[num] = struct{}{}
 
-		// Insertion sort
-		for x := 1; x < len(*i); x++ {
-			value := (*i)[x]
-			y := x - 1
-			for y >= 0 && (*i)[y] > value {
-				(*i)[y+1] = (*i)[y]
-				y = y - 1
-			}
-			(*i)[y+1] = value
-		}
 	}
 
 	return nil
@@ -93,7 +74,7 @@ func (i *intslice) Set(value string) error {
 
 func main() {
 
-	var replace_lines intslice
+	var replace_lines = IntSet{}
 
 	flag.Var(&replace_lines, "l", "Number of the line(s) to be replaced")
 
