@@ -48,6 +48,9 @@ func Exists(name string) bool {
 // set of ints
 type IntSet map[int]struct{}
 
+// set of strings
+type StrSlice []string
+
 func (i *IntSet) String() string {
 	return fmt.Sprint(*i)
 }
@@ -56,7 +59,6 @@ func (i *IntSet) Set(value string) error {
 	if len(*i) > 0 {
 		return errors.New("line flag already set")
 	}
-
 	for _, n := range strings.Split(value, ",") {
 		num, err := strconv.Atoi(n)
 		if err != nil {
@@ -66,49 +68,47 @@ func (i *IntSet) Set(value string) error {
 			continue
 		}
 		(*i)[num] = struct{}{}
-
 	}
+	return nil
+}
 
+func (s *StrSlice) String() string {
+	return fmt.Sprint(*s)
+}
+
+func (s *StrSlice) Set(value string) error {
+	*s = append(*s, value)
 	return nil
 }
 
 func main() {
 
 	var replace_lines = IntSet{}
+	var replace_strings StrSlice
 
 	flag.Var(&replace_lines, "l", "Number of the line(s) to be replaced")
+	flag.Var(&replace_strings, "r", "Word to be replaced")
 
 	flag.Parse()
 
-	//	if len(flag.Args()) == 0 {
-	fmt.Println("--:", flag.NArg(), flag.Args(), replace_lines)
-	//	}
-
-	//if flag.NFlag() > 0 {
-	//fmt.Println("lines to be replaced:")
-	//for i := 0; i < len(replace_lines); i++ {
-	//fmt.Printf("%d ", replace_lines[i])
-	//}
-	//}
+	fmt.Println("--:", flag.NArg(), flag.Args(), replace_lines, replace_strings)
 
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		readLine(bufio.NewScanner(os.Stdin), replace_lines)
 	} else {
-		if flag.NArg() > 0 {
-
-			f := flag.Arg(0)
-
-			if Exists(f) {
-				file, err := os.Open(f)
-				defer file.Close()
-
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				readLine(bufio.NewScanner(file), replace_lines)
+		if flag.NArg() != 1 {
+			fmt.Println("No filename specified")
+			os.Exit(1)
+		}
+		f := flag.Arg(0)
+		if Exists(f) {
+			file, err := os.Open(f)
+			defer file.Close()
+			if err != nil {
+				log.Fatal(err)
 			}
+			readLine(bufio.NewScanner(file), replace_lines)
 		}
 	}
 }
