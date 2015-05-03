@@ -98,7 +98,7 @@ func main() {
 		readLine(bufio.NewScanner(os.Stdin), replace_lines)
 	} else {
 		if flag.NArg() != 1 {
-			fmt.Println("No filename specified")
+			fmt.Println("No filename specified, -h for more info")
 			os.Exit(1)
 		}
 		f := flag.Arg(0)
