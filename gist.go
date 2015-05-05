@@ -22,20 +22,21 @@ func readLine(scanner *bufio.Scanner, replace_lines IntSet, replace_strings StrS
 
 	ra, _ := regexp.Compile(NOT_SPACE)
 
+	var buffer []string
+
 	for scanner.Scan() {
 		_, s := replace_lines[line]
 		if s {
-			fmt.Printf("%d: %v\n", line, ra.ReplaceAllString(scanner.Text(), "-"))
+			buffer = append(buffer, ra.ReplaceAllString(scanner.Text(), "-"))
 		} else {
 			if len(replace_strings) > 0 {
 				str := scanner.Text()
 				for _, rs := range replace_strings {
 					str = strings.Replace(str, rs, strings.Repeat("-", len(rs)), -1)
 				}
-				fmt.Printf("%d: %v\n", line, str)
-
+				buffer = append(buffer, str)
 			} else {
-				fmt.Printf("%d: %v\n", line, scanner.Text())
+				buffer = append(buffer, scanner.Text())
 			}
 		}
 		line += 1
@@ -43,6 +44,11 @@ func readLine(scanner *bufio.Scanner, replace_lines IntSet, replace_strings StrS
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
+	}
+
+	// print preview
+	for k, v := range buffer {
+		fmt.Println(k+1, v)
 	}
 
 }
