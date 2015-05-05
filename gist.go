@@ -21,11 +21,6 @@ func readLine(scanner *bufio.Scanner, replace_lines IntSet, replace_strings StrS
 	line := 1
 
 	ra, _ := regexp.Compile(NOT_SPACE)
-	if len(replace_strings) > 0 {
-		for i, e := range replace_strings {
-			fmt.Println(i, e, "xxxxxxxxxx")
-		}
-	}
 
 	for scanner.Scan() {
 		_, s := replace_lines[line]
@@ -33,7 +28,11 @@ func readLine(scanner *bufio.Scanner, replace_lines IntSet, replace_strings StrS
 			fmt.Printf("%d: %v\n", line, ra.ReplaceAllString(scanner.Text(), "-"))
 		} else {
 			if len(replace_strings) > 0 {
-				fmt.Printf("%d: %v\n", line, ra.ReplaceAllString(scanner.Text(), "-"))
+				str := scanner.Text()
+				for _, rs := range replace_strings {
+					str = strings.Replace(str, rs, strings.Repeat("-", len(rs)), -1)
+				}
+				fmt.Printf("%d: %v\n", line, str)
 
 			} else {
 				fmt.Printf("%d: %v\n", line, scanner.Text())
@@ -106,6 +105,7 @@ func main() {
 		fmt.Printf("  example: %s -l 3,7 -r secret -r 'my passphrase' file.conf\n\n", os.Args[0])
 		fmt.Println("  -l: Number of the line(s) to be replaced, comma separated.")
 		fmt.Println("  -r: Word to be replaced, can be used multiple times.")
+		fmt.Println("  -p: Push the gist.")
 	}
 
 	flag.Parse()
