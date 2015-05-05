@@ -47,8 +47,9 @@ func readLine(scanner *bufio.Scanner, replace_lines IntSet, replace_strings StrS
 	}
 
 	// print preview
+	pad := len(fmt.Sprint(len(buffer)))
 	for k, v := range buffer {
-		fmt.Println(k+1, v)
+		fmt.Printf("%*d  %s\n", pad, k, v)
 	}
 
 }
@@ -116,15 +117,14 @@ func main() {
 
 	flag.Parse()
 
-	if flag.NArg() != 1 {
-		fmt.Fprintf(os.Stderr, "Usage: %s [-lrh] file, use -h for more info\n\n", os.Args[0])
-		os.Exit(1)
-	}
-
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		readLine(bufio.NewScanner(os.Stdin), replace_lines, replace_strings)
 	} else {
+		if flag.NArg() != 1 {
+			fmt.Fprintf(os.Stderr, "Usage: %s [-lrh] file, use -h for more info\n\n", os.Args[0])
+			os.Exit(1)
+		}
 		f := flag.Arg(0)
 		if Exists(f) {
 			file, err := os.Open(f)
