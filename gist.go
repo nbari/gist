@@ -104,8 +104,8 @@ func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [-lr] file\n\n", os.Args[0])
 		fmt.Printf("  example: %s -l 3,7 -r secret -r 'my passphrase' file.conf\n\n", os.Args[0])
-		fmt.Println("  -l: Number of the line(s) to be replaced, comma separated")
-		fmt.Println("  -r: Word to be replaced, can be used multiple times")
+		fmt.Println("  -l: Number of the line(s) to be replaced, comma separated.")
+		fmt.Println("  -r: Word to be replaced, can be used multiple times.")
 	}
 
 	flag.Parse()
