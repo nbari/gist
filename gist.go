@@ -49,7 +49,7 @@ func readLine(scanner *bufio.Scanner, replace_lines IntSet, replace_strings StrS
 	// print preview
 	pad := len(fmt.Sprint(len(buffer)))
 	for k, v := range buffer {
-		fmt.Printf("%*d  %s\n", pad, k, v)
+		fmt.Printf("%*d  %s\n", pad, k+1, v)
 	}
 
 }
