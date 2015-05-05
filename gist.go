@@ -14,6 +14,8 @@ import (
 
 const NOT_SPACE = "[^\\s]"
 
+var buffer []string
+
 func readLine(scanner *bufio.Scanner, replace_lines IntSet, replace_strings StrSlice) {
 
 	scanner.Split(bufio.ScanLines)
@@ -21,8 +23,6 @@ func readLine(scanner *bufio.Scanner, replace_lines IntSet, replace_strings StrS
 	line := 1
 
 	ra, _ := regexp.Compile(NOT_SPACE)
-
-	var buffer []string
 
 	for scanner.Scan() {
 		_, s := replace_lines[line]
@@ -44,12 +44,6 @@ func readLine(scanner *bufio.Scanner, replace_lines IntSet, replace_strings StrS
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
-	}
-
-	// print preview
-	pad := len(fmt.Sprint(len(buffer)))
-	for k, v := range buffer {
-		fmt.Printf("%*d  %s\n", pad, k+1, v)
 	}
 
 }
@@ -106,9 +100,10 @@ func main() {
 
 	flag.Var(&replace_lines, "l", ">>>>>>>>>>>>>>>>> l")
 	flag.Var(&replace_strings, "r", ">>>>>>>>>>>>>>> r")
+	push := flag.Bool("p", false, "")
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [-lr] file\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [-lrp] file\n\n", os.Args[0])
 		fmt.Printf("  example: %s -l 3,7 -r secret -r 'my passphrase' file.conf\n\n", os.Args[0])
 		fmt.Println("  -l: Number of the line(s) to be replaced, comma separated.")
 		fmt.Println("  -r: Word to be replaced, can be used multiple times.")
@@ -122,7 +117,7 @@ func main() {
 		readLine(bufio.NewScanner(os.Stdin), replace_lines, replace_strings)
 	} else {
 		if flag.NArg() != 1 {
-			fmt.Fprintf(os.Stderr, "Usage: %s [-lrh] file, use -h for more info\n\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "Usage: %s [-lrp] file, use -h for more info\n\n", os.Args[0])
 			os.Exit(1)
 		}
 		f := flag.Arg(0)
@@ -137,4 +132,15 @@ func main() {
 			fmt.Printf("Cannot read file: %s\n", f)
 		}
 	}
+
+	// print preview
+	pad := len(fmt.Sprint(len(buffer)))
+	for k, v := range buffer {
+		fmt.Printf("%*d  %s\n", pad, k+1, v)
+	}
+
+	if *push {
+		fmt.Println("->>>>>>>>>>>>>>>> push")
+	}
+
 }
