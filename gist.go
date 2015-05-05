@@ -12,20 +12,32 @@ import (
 	"strings"
 )
 
-func readLine(scanner *bufio.Scanner, replace_lines IntSet) {
+const NOT_SPACE = "[^\\s]"
+
+func readLine(scanner *bufio.Scanner, replace_lines IntSet, replace_strings StrSlice) {
 
 	scanner.Split(bufio.ScanLines)
 
 	line := 1
 
-	ra, _ := regexp.Compile("[^\\s]")
+	ra, _ := regexp.Compile(NOT_SPACE)
+	if len(replace_strings) > 0 {
+		for i, e := range replace_strings {
+			fmt.Println(i, e, "xxxxxxxxxx")
+		}
+	}
 
 	for scanner.Scan() {
 		_, s := replace_lines[line]
 		if s {
 			fmt.Printf("%d: %v\n", line, ra.ReplaceAllString(scanner.Text(), "-"))
 		} else {
-			fmt.Printf("%d: %v\n", line, scanner.Text())
+			if len(replace_strings) > 0 {
+				fmt.Printf("%d: %v\n", line, ra.ReplaceAllString(scanner.Text(), "-"))
+
+			} else {
+				fmt.Printf("%d: %v\n", line, scanner.Text())
+			}
 		}
 		line += 1
 	}
@@ -86,21 +98,27 @@ func main() {
 	var replace_lines = IntSet{}
 	var replace_strings StrSlice
 
-	flag.Var(&replace_lines, "l", "Number of the line(s) to be replaced")
-	flag.Var(&replace_strings, "r", "Word to be replaced")
+	flag.Var(&replace_lines, "l", ">>>>>>>>>>>>>>>>> l")
+	flag.Var(&replace_strings, "r", ">>>>>>>>>>>>>>> r")
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [-lr] file\n\n", os.Args[0])
+		fmt.Printf("  example: %s -l 3,7 -r secret -r 'my passphrase' file.conf\n\n", os.Args[0])
+		fmt.Println("  -l: Number of the line(s) to be replaced, comma separated")
+		fmt.Println("  -r: Word to be replaced, can be used multiple times")
+	}
 
 	flag.Parse()
 
-	fmt.Println("--:", flag.NArg(), flag.Args(), replace_lines, replace_strings)
+	if flag.NArg() != 1 {
+		fmt.Fprintf(os.Stderr, "Usage: %s [-lrh] file, use -h for more info\n\n", os.Args[0])
+		os.Exit(1)
+	}
 
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		readLine(bufio.NewScanner(os.Stdin), replace_lines)
+		readLine(bufio.NewScanner(os.Stdin), replace_lines, replace_strings)
 	} else {
-		if flag.NArg() != 1 {
-			fmt.Println("No filename specified")
-			os.Exit(1)
-		}
 		f := flag.Arg(0)
 		if Exists(f) {
 			file, err := os.Open(f)
@@ -108,7 +126,9 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			readLine(bufio.NewScanner(file), replace_lines)
+			readLine(bufio.NewScanner(file), replace_lines, replace_strings)
+		} else {
+			fmt.Printf("Cannot read file: %s\n", f)
 		}
 	}
 }
