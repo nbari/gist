@@ -112,6 +112,7 @@ func main() {
 
 	flag.Parse()
 
+	// check if there is something to read from STDIN
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		readLine(bufio.NewScanner(os.Stdin), replace_lines, replace_strings)
